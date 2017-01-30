@@ -21,7 +21,7 @@ python send_message.py
 ## Docker
 
 ```
-docker run -rm  
+docker run --rm  \
 -e PLUGIN_REPO_OWNER=herry \
 -e PLUGIN_REPO_NAME=drs \
 -e PLUGIN_REPO_FULL_NAME=drs \

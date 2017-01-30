@@ -21,11 +21,11 @@ def get_roomId():
     '''
 
     # If an explict roomId was provided as a varg, verify it's a valid roomId
-    if os.environ["plugin_roomId"]:
-        if verify_roomId(os.environ["plugin_roomId"]):
-            return os.environ["plugin_roomId"]
+    if os.environ["PLUGIN_ROOMID"]:
+        if verify_roomId(os.environ["PLUGIN_ROOMID"]):
+            return os.environ["PLUGIN_ROOMID"]
     # If a roomName is provided, send to room with that title
-    elif os.environ["plugin_roomName"]:
+    elif os.environ["PLUGIN_ROOMNAME"]:
         # Try to find room based on room name
         response = requests.get(
             spark_urls["rooms"],
@@ -35,7 +35,7 @@ def get_roomId():
         #print("Number Rooms: " + str(len(rooms)))
         for room in rooms:
             #print("Room: " + room["title"])
-            if os.environ["plugin_roomName"] == room["title"]:
+            if os.environ["PLUGIN_ROOMNAME"] == room["title"]:
                 return room["id"]
 
     # If no valid roomId could be found, raise error
@@ -61,20 +61,20 @@ def standard_message():
     '''
     This will create a standard notification message.
     '''
-    status = os.environ["plugin_build_status"]
+    status = os.environ["PLUGIN_BUILD_STATUS"]
     if status == "success":
-        message = "##Build for %s is Successful \n" % (os.environ["plugin_repo_full_name"])
-        message = message + "**Build author:** [%s](%s) \n" % (os.environ["plugin_build_author"], os.environ["plugin_plugin_build_author_email"])
+        message = "##Build for %s is Successful \n" % (os.environ["PLUGIN_REPO_FULL_NAME"])
+        message = message + "**Build author:** [%s](%s) \n" % (os.environ["PLUGIN_BUILD_AUTHOR"], os.environ["PLUGIN_BUILD_AUTHOR_EMAIL"])
     else:
-        message = "#Build for %s FAILED!!! \n" % (os.environ["plugin_repo_full_name"])
-        message = message + "**Drone blames build author:** [%s](%s) \n" % (os.environ["plugin_build_author"], os.environ["plugin_build_author_email"])
+        message = "#Build for %s FAILED!!! \n" % (os.environ["PLUGIN_REPO_FULL_NAME"])
+        message = message + "**Drone blames build author:** [%s](%s) \n" % (os.environ["PLUGIN_BUILD_AUTHOR"], os.environ["PLUGIN_BUILD_AUTHOR_EMAIL"])
 
     message = message + "###Build Details \n"
-    message = message + "* [Build Log](%s/%s/%s)\n" % (os.environ["plugin_system_link_url"], os.environ["plugin_repo_full_name"], os.environ["plugin_build_number"])
-    message = message + "* [Commit Log](%s)\n" % (os.environ["plugin_build_link_url"])
-    message = message + "* **Branch:** %s\n" % (os.environ["plugin_build_branch"])
-    message = message + "* **Event:** %s\n" % (os.environ["plugin_build_event"])
-    message = message + "* **Commit Message:** %s\n" % (os.environ["plugin_build_message"])
+    message = message + "* [Build Log](%s/%s/%s)\n" % (os.environ["PLUGIN_SYSTEM_LINK_URL"], os.environ["PLUGIN_REPO_FULL_NAME"], os.environ["PLUGIN_BUILD_NUMBER"])
+    message = message + "* [Commit Log](%s)\n" % (os.environ["PLUGIN_BUILD_LINK_URL"])
+    message = message + "* **Branch:** %s\n" % (os.environ["PLUGIN_BUILD_BRANCH"])
+    message = message + "* **Event:** %s\n" % (os.environ["PLUGIN_BUILD_EVENT"])
+    message = message + "* **Commit Message:** %s\n" % (os.environ["PLUGIN_BUILD_MESSAGE"])
 
     return message
 
@@ -93,7 +93,7 @@ def send_message(message_data, message_text):
 def main():
 
     # Prepare headers and message objects
-    spark_headers["Authorization"] = "Bearer %s" % (os.environ["plugin_auth_token"])
+    spark_headers["Authorization"] = "Bearer %s" % (os.environ["PLUGIN_AUTH_TOKEN"])
     spark_message = {}
 
     # Determine destination for message
@@ -103,8 +103,8 @@ def main():
         spark_message["roomId"] = roomId
     except LookupError:
         # See if a personEmail was provided
-        if os.environ["plugin_auth_token"]:
-            spark_message["toPersonEmail"] = os.environ["plugin_auth_token"]
+        if os.environ["PLUGIN_AUTH_TOKEN"]:
+            spark_message["toPersonEmail"] = os.environ["PLUGIN_AUTH_TOKEN"]
         else:
             raise(LookupError("Requires valid roomId, roomName, or personEmail to be provided.  "))
 
