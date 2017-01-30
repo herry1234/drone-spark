@@ -3,7 +3,6 @@
 This is the Python Code for a drone.io plugin to send messages using Cisco Spark
 '''
 
-import drone
 import requests
 import os
 
@@ -16,17 +15,17 @@ spark_urls = {
 spark_headers = {}
 spark_headers["Content-type"] = "application/json"
 
-def get_roomId(payload):
+def get_roomId():
     '''
     Determine the roomId to send the message to.
     '''
 
     # If an explict roomId was provided as a varg, verify it's a valid roomId
-    if ("roomId" in payload["vargs"].keys()):
-        if verify_roomId(payload["vargs"]["roomId"]):
-            return payload["vargs"]["roomId"]
+    if os.environ["plugin_roomId"]:
+        if verify_roomId(os.environ["plugin_roomId"]):
+            return os.environ["plugin_roomId"]
     # If a roomName is provided, send to room with that title
-    elif ("roomName" in payload["vargs"].keys()):
+    elif os.environ["plugin_roomName"]:
         # Try to find room based on room name
         response = requests.get(
             spark_urls["rooms"],
@@ -36,10 +35,10 @@ def get_roomId(payload):
         #print("Number Rooms: " + str(len(rooms)))
         for room in rooms:
             #print("Room: " + room["title"])
-            if payload["vargs"]["roomName"] == room["title"]:
+            if os.environ["plugin_roomName"] == room["title"]:
                 return room["id"]
 
-    # If no valid roomId could be found in the payload, raise error
+    # If no valid roomId could be found, raise error
     raise(LookupError("roomId can't be determined"))
 
 def verify_roomId(roomId):
@@ -58,24 +57,24 @@ def verify_roomId(roomId):
     else:
         return False
 
-def standard_message(payload):
+def standard_message():
     '''
     This will create a standard notification message.
     '''
-    status = payload["build"]["status"]
+    status = os.environ["plugin_build_status"]
     if status == "success":
-        message = "##Build for %s is Successful \n" % (payload["repo"]["full_name"])
-        message = message + "**Build author:** [%s](%s) \n" % (payload["build"]["author"], payload["build"]["author_email"])
+        message = "##Build for %s is Successful \n" % (os.environ["plugin_repo_full_name"])
+        message = message + "**Build author:** [%s](%s) \n" % (os.environ["plugin_build_author"], os.environ["plugin_plugin_build_author_email"])
     else:
-        message = "#Build for %s FAILED!!! \n" % (payload["repo"]["full_name"])
-        message = message + "**Drone blames build author:** [%s](%s) \n" % (payload["build"]["author"], payload["build"]["author_email"])
+        message = "#Build for %s FAILED!!! \n" % (os.environ["plugin_repo_full_name"])
+        message = message + "**Drone blames build author:** [%s](%s) \n" % (os.environ["plugin_build_author"], os.environ["plugin_build_author_email"])
 
     message = message + "###Build Details \n"
-    message = message + "* [Build Log](%s/%s/%s)\n" % (payload["system"]["link_url"], payload["repo"]["full_name"], payload["build"]["number"])
-    message = message + "* [Commit Log](%s)\n" % (payload["build"]["link_url"])
-    message = message + "* **Branch:** %s\n" % (payload["build"]["branch"])
-    message = message + "* **Event:** %s\n" % (payload["build"]["event"])
-    message = message + "* **Commit Message:** %s\n" % (payload["build"]["message"])
+    message = message + "* [Build Log](%s/%s/%s)\n" % (os.environ["plugin_system_link_url"], os.environ["plugin_repo_full_name"], os.environ["plugin_build_number"])
+    message = message + "* [Commit Log](%s)\n" % (os.environ["plugin_build_link_url"])
+    message = message + "* **Branch:** %s\n" % (os.environ["plugin_build_branch"])
+    message = message + "* **Event:** %s\n" % (os.environ["plugin_build_event"])
+    message = message + "* **Commit Message:** %s\n" % (os.environ["plugin_build_message"])
 
     return message
 
@@ -92,39 +91,28 @@ def send_message(message_data, message_text):
     return response
 
 def main():
-    payload = drone.plugin.get_input()
-    vargs = payload["vargs"]
 
     # Prepare headers and message objects
-    spark_headers["Authorization"] = "Bearer %s" % (vargs["auth_token"])
+    spark_headers["Authorization"] = "Bearer %s" % (os.environ["plugin_auth_token"])
     spark_message = {}
 
     # Determine destination for message
     try:
         # First look for a valid roomId or roomName
-        roomId = get_roomId(payload)
+        roomId = get_roomId()
         spark_message["roomId"] = roomId
     except LookupError:
         # See if a personEmail was provided
-        if "personEmail" in vargs.keys():
-            spark_message["toPersonEmail"] = vargs["personEmail"]
+        if os.environ["plugin_auth_token"]:
+            spark_message["toPersonEmail"] = os.environ["plugin_auth_token"]
         else:
             raise(LookupError("Requires valid roomId, roomName, or personEmail to be provided.  "))
 
     # Send Standard message
-    standard_notify = send_message(spark_message, standard_message(payload))
+    standard_notify = send_message(spark_message, standard_message())
     if standard_notify.status_code != 200:
         print(standard_notify.json()["message"])
         raise(SystemExit("Something went wrong..."))
-
-    # If there was a message sent from .drone.yml
-    if "message" in vargs.keys():
-        custom_notify = send_message(spark_message, vargs["message"])
-        if custom_notify.status_code != 200:
-            print(custom_notify.json()["message"])
-            raise (SystemExit("Something went wrong..."))
-
-
 
 if __name__ == "__main__":
     main()

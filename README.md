@@ -15,87 +15,27 @@ See [DOCS.md](DOCS.md) for how to configure and use the plugin.
 ## Python
 
 ```
-python send_message.py <<EOF
-{
-    "system": {
-        "link_url": "http://drone.mycompany.com"
-    },
-    "repo": {
-        "owner": "octocat",
-        "name": "hello-world",
-        "full_name": "octocat/hello-world",
-        "link_url": "https://github.com/octocat/hello-world",
-        "clone_url": "https://github.com/octocat/hello-world.git"
-    },
-    "build": {
-        "number": 1,
-        "event": "push",
-        "branch": "master",
-        "commit": "436b7a6e2abaddfd35740527353e78a227ddcb2c",
-        "ref": "refs/heads/master",
-        "author": "octocat",
-        "author_email": "octocat@github.com", 
-        "link_url": "https://github.com/octocat/hello-world",
-        "message": "Testing...",
-        "status": "success"
-    },
-    "workspace": {
-        "root": "/drone/src",
-        "path": "/drone/src/github.com/octocat/hello-world",
-        "keys": {
-            "private": "-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQC..."
-        }
-    },
-    "vargs": {
-        "message": "# Sending Spark Message \n Using Markdown!!!",
-		"auth_token": "ZmRm....",
-		"roomName": "ROOM NAME"
-    }
-}
-EOF
+python send_message.py
 ```
 
 ## Docker
 
 ```
-docker run -i hpreston/drone-spark <<EOF
-{
-    "system": {
-        "link_url": "http://drone.mycompany.com"
-    },
-    "repo": {
-        "owner": "octocat",
-        "name": "hello-world",
-        "full_name": "octocat/hello-world",
-        "link_url": "https://github.com/octocat/hello-world",
-        "clone_url": "https://github.com/octocat/hello-world.git"
-    },
-    "build": {
-        "number": 1,
-        "event": "push",
-        "branch": "master",
-        "commit": "436b7a6e2abaddfd35740527353e78a227ddcb2c",
-        "ref": "refs/heads/master",
-        "author": "octocat",
-        "author_email": "octocat@github.com", 
-        "link_url": "https://github.com/octocat/hello-world",
-        "message": "Testing...",
-        "status": "success"
-    },
-    "workspace": {
-        "root": "/drone/src",
-        "path": "/drone/src/github.com/octocat/hello-world",
-        "keys": {
-            "private": "-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQC..."
-        }
-    },
-    "vargs": {
-        "message": "# Sending Spark Message \n Using Markdown!!!",
-		"auth_token": "ZmRm....",
-		"roomName": "ROOM NAME"
-    }
-}
-EOF
+docker run -rm  
+-e PLUGIN_REPO_OWNER=herry \
+-e PLUGIN_REPO_NAME=drs \
+-e PLUGIN_REPO_FULL_NAME=drs \
+-e PLUGIN_BUILD_NUMBER=1 \
+-e PLUGIN_BUILD_BRANCH=master \
+-e PLUGIN_BUILD_AUTHOR=HERRY \
+-e PLUGIN_BUILD_AUTHOR_EMAIL=herry@gmail.com \
+-e PLUGIN_BUILD_MESSAGE=Testing... \
+-e PLUGIN_BUILD_STATUS=sucess \
+-e PLUGIN_MESSAGE=# Sending Spark Message \n Using Markdown!!! \
+-e PLUGIN_AUTH_TOKEN=N2ZjYWNjNDgtMGJjOS00ZWNjLThiN2EtZGJiMjVjYmU4NWRmOTU2ZWNiY2ItYjRk \
+-e PLUGIN_roomName=herrytest \
+drone-spark
+
 ```
 
 # Roadmap and Plans
