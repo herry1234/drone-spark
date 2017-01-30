@@ -21,11 +21,11 @@ def get_roomId():
     '''
 
     # If an explict roomId was provided as a varg, verify it's a valid roomId
-    if os.environ["PLUGIN_ROOMID"]:
+    if os.environ.get("PLUGIN_ROOMID"):
         if verify_roomId(os.environ["PLUGIN_ROOMID"]):
             return os.environ["PLUGIN_ROOMID"]
     # If a roomName is provided, send to room with that title
-    elif os.environ["PLUGIN_ROOMNAME"]:
+    elif os.environ.get("PLUGIN_ROOMNAME"):
         # Try to find room based on room name
         response = requests.get(
             spark_urls["rooms"],
