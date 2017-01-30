@@ -22,6 +22,7 @@ python send_message.py
 
 ```
 docker run --rm  \
+-e PLUGIN_SYSTEM_LINK_URL="http://example.com/plugin" \
 -e PLUGIN_REPO_OWNER=herry \
 -e PLUGIN_REPO_NAME=drs \
 -e PLUGIN_REPO_FULL_NAME=drs \
@@ -31,9 +32,11 @@ docker run --rm  \
 -e PLUGIN_BUILD_AUTHOR_EMAIL=herry@gmail.com \
 -e PLUGIN_BUILD_MESSAGE=Testing... \
 -e PLUGIN_BUILD_STATUS=sucess \
--e PLUGIN_MESSAGE=# Sending Spark Message \n Using Markdown!!! \
+-e PLUGIN_BUILD_LINK_URL="http://example.com/plugin" \
+-e PLUGIN_BUILD_EVENT="Test" \
+-e PLUGIN_MESSAGE="# Sending Spark Message \n Using Markdown!!!" \
 -e PLUGIN_AUTH_TOKEN=N2ZjYWNjNDgtMGJjOS00ZWNjLThiN2EtZGJiMjVjYmU4NWRmOTU2ZWNiY2ItYjRk \
--e PLUGIN_roomName=herrytest \
+-e PLUGIN_ROOMNAME=herrytest \
 drone-spark
 
 ```
